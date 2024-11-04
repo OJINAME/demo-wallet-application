@@ -38,11 +38,9 @@ The code follows best practices, including TypeScript typing for safer developme
 
 ## ER Diagram
 
-![Lendsqr Wallets Service (E-R Diagram)](./assets/images/lendsqr-wallets_1.png)
-
 The database design ensures data integrity and efficient access patterns. The following Entity-Relationship (ER) Diagram illustrates the relationships among the primary tables in the system:
 
-![ER Diagram](./path/to/lendsqr-wallets_1.png)
+![Lendsqr Wallets Service (E-R Diagram)](./assets/images/lendsqr-wallets_1.png)
 
 1. **Users**: Stores user information and credentials.
 2. **Wallets**: Manages wallet data, linked to specific users.
