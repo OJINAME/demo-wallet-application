@@ -30,7 +30,8 @@ app.use((err: Error, req: express.Request, res: express.Response, _next: express
   console.error(err.stack);
   res.status(500).json({ 
     success: false, 
-    message: 'Internal server error' 
+    message: 'Internal server error' ,
+    details: err.message,
   });
 });
 
