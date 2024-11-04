@@ -1,26 +1,37 @@
 import { Knex } from 'knex';
 import { v4 as uuidv4 } from 'uuid';
 import { Wallet, Transaction } from '../types';
+import { ApplicationError } from '../utils/errors';
 
 export class WalletService {
   constructor(private readonly db: Knex) {}
 
-  async createWallet(userId: string): Promise<Wallet> {
+  async createWallet(userId: string, trx?: any): Promise<Wallet> {
+    console.log('wallet creation - 1');
     const walletId = uuidv4();
     
-    await this.db('wallets')
-      .insert({
-        id: walletId,
-        user_id: userId,
-        balance: 0,
-        status: 'active'
-      });
-
-    const wallet = await this.db('wallets')
-      .where('id', walletId)
-      .first();
-
-    return wallet;
+    // Use the passed transaction if available, otherwise use regular db connection
+    const db = trx || this.db;
+    
+    try {
+      await db('wallets')
+        .insert({
+          id: walletId,
+          user_id: userId,
+          balance: 0,
+          status: 'active'
+        });
+  
+      console.log('wallet creation - 2');
+      const wallet = await db('wallets')
+        .where('id', walletId)
+        .first();
+  
+      return wallet;
+    } catch (error) {
+      console.log('Error during wallet insertion:', error);
+      throw new ApplicationError('Failed to create wallet', 500, 'WALLET_CREATION_FAILED');
+    }
   }
 
   async fundWallet(walletId: string, amount: number): Promise<Transaction> {

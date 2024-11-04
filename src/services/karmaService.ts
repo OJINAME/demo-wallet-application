@@ -56,40 +56,37 @@ export class KarmaService {
         'INVALID_IDENTITY_FORMAT'
       );
     }
-
-    try {
-      const response = await this.apiClient.get<KarmaCheckResponse>(
-        `/v2/verification/karma/${encodeURIComponent(identity)}`
-      );
-
-      // Log the response for monitoring purposes
-      console.log('Karma check response:', response.data);
-
-      // An identity is blacklisted if:
-      // 1. Response status is 'success'
-      // 2. Response has data object
-      // 3. Data object contains karma_identity
-      return response.data.status === 'success' && 
-             !!response.data.data &&
-             !!response.data.data.karma_identity;
-
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Any error response means the identity is not blacklisted
-        // This includes:
-        // - Identity not found in karma ecosystem
-        // - Other API errors
-        return false;
-      }
-
-      // For unexpected errors, throw an ApplicationError
-      throw new ApplicationError(
-        'An unexpected error occurred while checking karma status',
-        500,
-        'KARMA_CHECK_ERROR'
-      );
-    }
+  
+    return this.apiClient
+      .get<KarmaCheckResponse>(`/v2/verification/karma/${encodeURIComponent(identity)}`)
+      .then((response) => {
+        console.log('Karma check response:', response.data);
+  
+        // An identity is blacklisted if:
+        // 1. Response status is 'success'
+        // 2. Response has data object
+        // 3. Data object contains karma_identity
+        return response.data.status === 'success' && 
+               !!response.data.data &&
+               !!response.data.data.karma_identity;
+      })
+      .catch((error) => {
+        if (axios.isAxiosError(error)) {
+          // Log error details if needed
+          console.log('Error in Karma check:', error.response?.status, error.response?.data);
+          // Any error response means the identity is not blacklisted
+          return false;
+        }
+  
+        // For unexpected errors, throw an ApplicationError
+        throw new ApplicationError(
+          'An unexpected error occurred while checking karma status',
+          500,
+          'KARMA_CHECK_ERROR'
+        );
+      });
   }
+  
 
   /**
    * Get detailed karma information for an identity
